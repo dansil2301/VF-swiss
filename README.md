@@ -38,126 +38,84 @@ go run ./cmd/server
 
 Если секрет когда-либо попадал в коммит, терминальный лог, публичный issue или другой общий канал, считайте его раскрытым: отзовите/смените его у провайдера и обновите на сервере. Простого удаления из последнего коммита недостаточно.
 
-## Деплой на Ubuntu VPS через SSH
+## Production-деплой на Timeweb Cloud
 
-Текущий вариант деплоя — Linux-бинарник + файлы сайта + systemd + Nginx. Сервер размещается в Timeweb Cloud; IP и домен ниже оставлены заполнителями, чтобы не публиковать инфраструктурные данные в репозитории. В панели Timeweb настройте DNS A-запись домена на IP сервера и при необходимости правила сетевого экрана.
+Production уже работает без Docker: Ubuntu 26.04, x86_64, `systemd`-сервис `vfswiss` от пользователя `vfswiss`, Nginx проксирует приложение на `127.0.0.1:8080`, домен — `vf-swiss.ru`. Docker на сервере не установлен и для этого деплоя не нужен.
 
-### 1. Первоначальная подготовка сервера
+Файл [`.github/workflows/deploy.yml`](./.github/workflows/deploy.yml) запускает `go test ./...` и `go vet ./...`, собирает Linux/amd64-бинарник и при включённом переключателе `DEPLOY_ENABLED` загружает его, шаблоны и статику по SSH. Деплой запускает `systemd`; после перезапуска workflow проверяет `https://vf-swiss.ru/health`.
 
-Подключитесь с доверенного компьютера по SSH:
+Деплой не копирует и не изменяет `/opt/vfswiss/.env`, базу `/opt/vfswiss/database/app.db`, `/opt/vfswiss/web/uploads`, конфигурацию Nginx или unit-файл systemd. Архив проверяется перед распаковкой; серверный helper откатывает бинарник и сайт, если сервис не запускается. Не добавляйте секреты, базу или пользовательские файлы в GitHub.
+
+### Однократная подготовка сервера
+
+Сгенерируйте отдельный SSH-ключ без парольной фразы на компьютере, где доступен OpenSSH:
+
+```powershell
+ssh-keygen -t ed25519 -f "$env:USERPROFILE\.ssh\vfswiss-actions" -C "github-actions-vfswiss"
+```
+
+Оставьте парольную фразу пустой. **Приватный файл `vfswiss-actions` не отправляйте в чат и не добавляйте в репозиторий.** Передайте на сервер только публичный ключ `vfswiss-actions.pub`.
+
+Скопируйте helper на сервер с доверенного компьютера:
 
 ```powershell
 $SERVER_HOST = "YOUR_SERVER_IP"
+scp .\deploy\vfswiss-deploy.sh "root@${SERVER_HOST}:/tmp/vfswiss-deploy.sh"
 ssh "root@$SERVER_HOST"
 ```
 
-На сервере (Ubuntu):
+На сервере однократно выполните:
 
 ```bash
-apt update
-apt install -y nginx certbot python3-certbot-nginx
-adduser --system --group --home /opt/vfswiss --no-create-home vfswiss
-install -d -o root -g vfswiss -m 0750 /opt/vfswiss
-install -d -o root -g vfswiss -m 0750 /opt/vfswiss/web /opt/vfswiss/web/templates /opt/vfswiss/web/static
-install -d -o vfswiss -g vfswiss -m 0750 /opt/vfswiss/database /opt/vfswiss/web/uploads
-exit
+useradd --create-home --home-dir /var/lib/vfswiss-deploy --shell /bin/bash vfswiss-deploy
+install -d -o vfswiss-deploy -g vfswiss-deploy -m 0700 /var/lib/vfswiss-deploy/incoming
+install -d -o vfswiss-deploy -g vfswiss-deploy -m 0700 /var/lib/vfswiss-deploy/.ssh
+install -o root -g root -m 0750 /tmp/vfswiss-deploy.sh /usr/local/sbin/vfswiss-deploy
+printf '%s\n' 'vfswiss-deploy ALL=(root) NOPASSWD: /usr/local/sbin/vfswiss-deploy' > /etc/sudoers.d/vfswiss-deploy
+chmod 0440 /etc/sudoers.d/vfswiss-deploy
+visudo -cf /etc/sudoers.d/vfswiss-deploy
 ```
 
-Не отключайте root-доступ, пока не настроите и не проверите вход по SSH для отдельного административного пользователя.
+Добавьте содержимое публичного `.pub`-файла в `/var/lib/vfswiss-deploy/.ssh/authorized_keys`, поставив `restrict` перед `ssh-ed25519`, например:
 
-### 2. Сборка и копирование приложения
-
-Из корня проекта в Windows PowerShell соберите Linux-бинарник. Для VPS ARM64 замените `amd64` на `arm64`.
-
-```powershell
-New-Item -ItemType Directory -Force .\dist | Out-Null
-$env:GOOS = "linux"
-$env:GOARCH = "amd64"
-go build -trimpath -ldflags="-s -w" -o .\dist\vfswiss-linux-amd64 .\cmd\server
-Remove-Item Env:GOOS
-Remove-Item Env:GOARCH
+```text
+restrict ssh-ed25519 AAAA... github-actions-vfswiss
 ```
 
-Задайте тот же `$SERVER_HOST`, затем скопируйте бинарник, шаблоны, статику и unit-файл:
-
-```powershell
-scp .\dist\vfswiss-linux-amd64 "root@${SERVER_HOST}:/opt/vfswiss/vfswiss"
-scp -r .\web\templates .\web\static "root@${SERVER_HOST}:/opt/vfswiss/web/"
-scp .\deploy\vfswiss.service "root@${SERVER_HOST}:/etc/systemd/system/vfswiss.service"
-```
-
-### 3. Секреты и права доступа
-
-На сервере создайте `/opt/vfswiss/.env` через `nano` или `sudoedit`, используя [.env.example](./.env.example) как перечень параметров. Укажите production-домен, абсолютные пути и новые SMTP/Turnstile секреты. Не копируйте в репозиторий локальный `.env`.
+Затем задайте владельца и права:
 
 ```bash
-nano /opt/vfswiss/.env
-chown root:root /opt/vfswiss/.env
-chmod 0600 /opt/vfswiss/.env
-chown root:vfswiss /opt/vfswiss/vfswiss
-chmod 0750 /opt/vfswiss/vfswiss
-chown -R root:vfswiss /opt/vfswiss/web/templates /opt/vfswiss/web/static
-chown -R vfswiss:vfswiss /opt/vfswiss/database /opt/vfswiss/web/uploads
+chown vfswiss-deploy:vfswiss-deploy /var/lib/vfswiss-deploy/.ssh/authorized_keys
+chmod 0600 /var/lib/vfswiss-deploy/.ssh/authorized_keys
 ```
 
-Для production установите как минимум:
+У deploy-пользователя нет root-доступа по SSH; `sudo` разрешает ему только root-owned helper без аргументов. Опция `restrict` запрещает SSH port/agent/X11 forwarding и PTY для этого ключа. Проверьте sudoers командой `visudo -cf` до включения pipeline.
 
-```env
-PORT=8080
-DB_PATH=/opt/vfswiss/database/app.db
-UPLOAD_DIR=/opt/vfswiss/web/uploads
-STATIC_DIR=/opt/vfswiss/web/static
-BASE_URL=https://YOUR_DOMAIN
-```
-
-Укажите SMTP-параметры; Turnstile включайте только при наличии обеих переменных.
-
-### 4. Nginx, HTTPS и запуск
-
-Скопируйте конфигурацию Nginx, замените `example.ru` на ваш домен и включите сайт:
-
-```powershell
-scp .\deploy\nginx.conf "root@${SERVER_HOST}:/etc/nginx/sites-available/vfswiss"
-ssh "root@$SERVER_HOST"
-```
-
-На сервере:
+При проверке сервера обнаружено, что SQLite-файл имеет права `0644`; ограничьте чтение файла пользователем приложения:
 
 ```bash
-nano /etc/nginx/sites-available/vfswiss
-ln -s /etc/nginx/sites-available/vfswiss /etc/nginx/sites-enabled/vfswiss
-nginx -t
-systemctl reload nginx
-systemctl daemon-reload
-systemctl enable --now vfswiss
-certbot --nginx -d YOUR_DOMAIN
-curl -fsS https://YOUR_DOMAIN/health
+chmod 0600 /opt/vfswiss/database/app.db
 ```
 
-Откройте в сетевом экране только необходимые входящие порты: SSH (лучше ограничить доверенными IP), HTTP и HTTPS. После настройки проверьте `systemctl status vfswiss`, `journalctl -u vfswiss` и автоматическое продление сертификата Certbot.
+В Nginx также настроен `alias` на каталог uploads. Фото из заявок могут содержать личные данные: убедитесь, что этот URL не открывает их посторонним. Pipeline этот alias не меняет.
 
-### Обновление вручную
+### GitHub Actions: секреты и включение автодеплоя
 
-Повторите сборку и копирование бинарника/шаблонов/статики из шага 2, затем перезапустите сервис:
+Доступный GitHub-интерфейс позволяет проверять workflow, но не записывать Actions secrets. Добавьте их самостоятельно в `dansil2301/VF-swiss` → **Settings → Secrets and variables → Actions → New repository secret**:
 
-```powershell
-ssh "root@$SERVER_HOST" "systemctl restart vfswiss"
-```
+| Secret | Значение |
+|---|---|
+| `DEPLOY_HOST` | Публичный IP или SSH hostname сервера |
+| `DEPLOY_PORT` | SSH-порт, обычно `22` |
+| `DEPLOY_USER` | `vfswiss-deploy` |
+| `DEPLOY_SSH_KEY` | Содержимое приватного `vfswiss-actions` (не `.pub`) |
+| `DEPLOY_KNOWN_HOSTS` | Проверенная запись host key для `DEPLOY_HOST` и порта |
 
-Проверьте `https://YOUR_DOMAIN/health`. База данных и загруженные клиентами файлы остаются в `/opt/vfswiss/database` и `/opt/vfswiss/web/uploads`; включите их в отдельные регулярные резервные копии и проверьте восстановление.
+Для `DEPLOY_KNOWN_HOSTS` сначала получите fingerprint host key на сервере (`ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub`), затем сверьте его с результатом `ssh-keyscan -t ed25519 -p 22 YOUR_SERVER_IP` на своём компьютере. Только после совпадения добавляйте строку `ssh-keyscan` в secret. Не полагайтесь на непроверенный ключ и не запускайте `ssh-keyscan` без сверки при каждом деплое.
 
-## Предлагаемый CI/CD pipeline (не настроен)
+После установки серверного helper и проверки SSH создайте в **Settings → Secrets and variables → Actions → Variables** переменную `DEPLOY_ENABLED` со значением `true`. До этого workflow выполняет тесты, но пропускает production deploy. После включения каждый push в `main` автоматически тестирует, собирает и выкатывает приложение. Первый запуск текущей версии можно вручную запустить через **Actions → Test and deploy → Run workflow**.
 
-Для автоматического деплоя можно перейти на Docker-образ и GitHub Actions:
-
-1. На pull request запускать `go test ./...`, `go vet ./...` и сборку Linux-образа; не выдавать таким job доступ к production-секретам.
-2. После merge в `main` собирать образ, тегировать его commit SHA и публиковать в GitHub Container Registry (GHCR) с `GITHUB_TOKEN`.
-3. Деплой запускать отдельным job после успешной сборки, ограничить его веткой `main` и GitHub Environment с ручным подтверждением.
-4. Подключаться по SSH отдельным непривилегированным deploy-пользователем с отдельным ключом в GitHub Environment secret. Не использовать `root`, не помещать приватный ключ в репозиторий и закрепить проверенный SSH host key; не доверять непроверенному `ssh-keyscan` во время каждого деплоя.
-5. На сервере выполнять `docker compose pull` и `docker compose up -d`, затем проверять `/health`. При сбое сохранять предыдущий image digest для отката.
-6. Хранить SQLite и uploads в постоянных томах вне контейнера; SMTP, Turnstile и другие секреты передавать на сервере через защищённый env-файл/secret store, не встраивать в image и не выводить в логи.
-
-Это предложение, а не готовая настройка: Dockerfile, Compose-файл, GitHub Actions workflow и SSH-учётная запись здесь не создаются. Текущий `deploy/vfswiss.service` запускает бинарник напрямую через systemd.
+При ошибке откройте Actions run; на сервере доступны `systemctl status vfswiss` и `journalctl -u vfswiss`. База и uploads сохраняются на месте. До включения автоматического деплоя настройте резервное копирование `/opt/vfswiss/database` и `/opt/vfswiss/web/uploads` вне VPS.
 
 ## Резервное копирование
 

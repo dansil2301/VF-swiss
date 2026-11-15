@@ -1,0 +1,111 @@
+name: Test and deploy
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Run tests
+        run: go test ./...
+
+      - name: Run vet
+        run: go vet ./...
+
+  deploy:
+    needs: test
+    if: ${{ vars.DEPLOY_ENABLED == 'true' && github.ref == 'refs/heads/main' }}
+    concurrency:
+      group: vfswiss-production
+      cancel-in-progress: false
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Build Linux release archive
+        env:
+          CGO_ENABLED: "0"
+          GOARCH: amd64
+          GOOS: linux
+        run: |
+          mkdir -p dist/package/web
+          go build -trimpath -ldflags="-s -w" -o dist/package/vfswiss ./cmd/server
+          cp -R web/templates web/static dist/package/web/
+          tar -czf dist/release.tar.gz -C dist/package vfswiss web/templates web/static
+
+      - name: Configure SSH
+        env:
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+          test -n "$DEPLOY_SSH_KEY"
+          test -n "$DEPLOY_KNOWN_HOSTS"
+          install -d -m 0700 "$HOME/.ssh"
+          printf '%s\n' "$DEPLOY_SSH_KEY" > "$HOME/.ssh/vfswiss_deploy"
+          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
+          chmod 0600 "$HOME/.ssh/vfswiss_deploy" "$HOME/.ssh/known_hosts"
+
+      - name: Upload release
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_PORT: ${{ secrets.DEPLOY_PORT }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+        run: |
+          set -euo pipefail
+          test -n "$DEPLOY_HOST"
+          test -n "$DEPLOY_USER"
+          port="${DEPLOY_PORT:-22}"
+          [[ "$port" =~ ^[0-9]{1,5}$ ]]
+          scp -i "$HOME/.ssh/vfswiss_deploy" \
+            -P "$port" \
+            -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes \
+            dist/release.tar.gz \
+            "$DEPLOY_USER@$DEPLOY_HOST:/var/lib/vfswiss-deploy/incoming/release.tar.gz"
+
+      - name: Install release and restart service
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_PORT: ${{ secrets.DEPLOY_PORT }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+        run: |
+          set -euo pipefail
+          port="${DEPLOY_PORT:-22}"
+          ssh -i "$HOME/.ssh/vfswiss_deploy" \
+            -p "$port" \
+            -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes \
+            "$DEPLOY_USER@$DEPLOY_HOST" \
+            "sudo -n /usr/local/sbin/vfswiss-deploy"
+
+      - name: Check production health
+        run: |
+          curl --fail --silent --show-error --retry 5 --retry-delay 2 https://vf-swiss.ru/health
+          curl --fail --silent --show-error https://vf-swiss.ru/

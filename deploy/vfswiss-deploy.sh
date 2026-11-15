@@ -6,6 +6,11 @@ archive=/var/lib/vfswiss-deploy/incoming/release.tar.gz
 PATH=/usr/sbin:/usr/bin:/sbin:/bin
 export PATH
 
+if [[ $# -ne 0 ]]; then
+	printf 'vfswiss-deploy does not accept arguments\n' >&2
+	exit 1
+fi
+
 if [[ ${EUID} -ne 0 ]]; then
 	printf 'vfswiss-deploy must run as root\n' >&2
 	exit 1

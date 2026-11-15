@@ -336,6 +336,18 @@ h2 {
     box-shadow: 0 14px 30px rgba(201, 176, 125, 0.2);
 }
 
+.btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.48;
+    filter: saturate(0.45);
+    transform: none;
+    box-shadow: none;
+}
+
+.btn:disabled:hover {
+    transform: none;
+}
+
 .btn-secondary {
     background: rgba(18, 19, 23, 0.72);
     border-color: var(--line);

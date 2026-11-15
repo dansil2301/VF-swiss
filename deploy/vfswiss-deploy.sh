@@ -116,11 +116,15 @@ restore_previous_release() {
 apply_release() {
 	mv "$app_root/vfswiss" "$backup/vfswiss" || return 1
 	mv "$app_root/web/templates" "$backup/templates" || return 1
-	mv "$app_root/web/static" "$backup/static" || return 1
+	if [[ -d "$stage/web/static" ]]; then
+		mv "$app_root/web/static" "$backup/static" || return 1
+	fi
 	install -o vfswiss -g vfswiss -m 0755 "$stage/vfswiss" "$app_root/.vfswiss-new" || return 1
 	mv "$app_root/.vfswiss-new" "$app_root/vfswiss" || return 1
 	mv "$stage/web/templates" "$app_root/web/templates" || return 1
-	mv "$stage/web/static" "$app_root/web/static" || return 1
+	if [[ -d "$stage/web/static" ]]; then
+		mv "$stage/web/static" "$app_root/web/static" || return 1
+	fi
 	chown -R vfswiss:vfswiss "$app_root/web/templates" "$app_root/web/static" || return 1
 }
 

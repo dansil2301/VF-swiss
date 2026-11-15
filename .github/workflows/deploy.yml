@@ -2,6 +2,12 @@ name: Test and deploy
 
 on:
   workflow_dispatch:
+    inputs:
+      include_static_assets:
+        description: Re-deploy images, videos, and other static files
+        type: boolean
+        required: true
+        default: false
   pull_request:
     branches:
       - main
@@ -41,6 +47,8 @@ jobs:
     steps:
       - name: Check out source
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Go
         uses: actions/setup-go@v5
@@ -48,16 +56,46 @@ jobs:
           go-version-file: go.mod
           cache: true
 
+      - name: Detect static asset changes
+        id: assets
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BEFORE_SHA: ${{ github.event.before }}
+          INCLUDE_STATIC_INPUT: ${{ inputs.include_static_assets }}
+        run: |
+          set -euo pipefail
+          if [[ "$EVENT_NAME" == "workflow_dispatch" ]]; then
+            include_static="$INCLUDE_STATIC_INPUT"
+          elif [[ ! "$BEFORE_SHA" =~ ^0+$ ]] && git cat-file -e "$BEFORE_SHA^{commit}" 2>/dev/null; then
+            if git diff --quiet "$BEFORE_SHA" "$GITHUB_SHA" -- web/static; then
+              include_static=false
+            else
+              include_static=true
+            fi
+          else
+            include_static=true
+          fi
+          echo "include_static=$include_static" >> "$GITHUB_OUTPUT"
+
       - name: Build Linux release archive
         env:
           CGO_ENABLED: "0"
           GOARCH: amd64
           GOOS: linux
+          INCLUDE_STATIC: ${{ steps.assets.outputs.include_static }}
         run: |
           mkdir -p dist/package/web
           go build -trimpath -ldflags="-s -w" -o dist/package/vfswiss ./cmd/server
-          cp -R web/templates web/static dist/package/web/
-          tar -czf dist/release.tar.gz -C dist/package vfswiss web/templates web/static
+          cp -R web/templates dist/package/web/
+          if [[ "$INCLUDE_STATIC" == "true" ]]; then
+            cp -R web/static dist/package/web/
+            tar -czf dist/release.tar.gz -C dist/package vfswiss web/templates web/static
+            echo "Static assets included in release."
+          else
+            tar -czf dist/release.tar.gz -C dist/package vfswiss web/templates
+            echo "Static assets unchanged; skipping images and videos."
+          fi
+          ls -lh dist/release.tar.gz
 
       - name: Configure SSH
         env:

@@ -42,7 +42,7 @@ go run ./cmd/server
 
 Production уже работает без Docker: Ubuntu 26.04, x86_64, `systemd`-сервис `vfswiss` от пользователя `vfswiss`, Nginx проксирует приложение на `127.0.0.1:8080`, домен — `vf-swiss.ru`. Docker на сервере не установлен и для этого деплоя не нужен.
 
-Файл [`.github/workflows/deploy.yml`](./.github/workflows/deploy.yml) запускает `go test ./...` и `go vet ./...`, собирает Linux/amd64-бинарник и при включённом переключателе `DEPLOY_ENABLED` загружает его, шаблоны и статику по SSH. Деплой запускает `systemd`; после перезапуска workflow проверяет `https://vf-swiss.ru/health`.
+Файл [`.github/workflows/deploy.yml`](./.github/workflows/deploy.yml) запускает `go test ./...` и `go vet ./...`, собирает Linux/amd64-бинарник и при включённом переключателе `DEPLOY_ENABLED` загружает его и шаблоны по SSH. Каталог `web/static` (включая фото и видео) передаётся только если он менялся в push; при ручном запуске workflow можно выбрать `include_static_assets`, чтобы принудительно передать статику. Если изображения не изменились, они остаются на сервере и повторно не загружаются. Для текущей версии проверенная сборка архива уменьшилась примерно с 42,9 до 5,1 МБ без изменений статики. Деплой запускает `systemd`; после перезапуска workflow проверяет `https://vf-swiss.ru/health`.
 
 Деплой не копирует и не изменяет `/opt/vfswiss/.env`, базу `/opt/vfswiss/database/app.db`, `/opt/vfswiss/web/uploads`, конфигурацию Nginx или unit-файл systemd. Архив проверяется перед распаковкой; серверный helper откатывает бинарник и сайт, если сервис не запускается. Не добавляйте секреты, базу или пользовательские файлы в GitHub.
 

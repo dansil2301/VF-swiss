@@ -59,11 +59,20 @@ with tarfile.open(archive_path, "r:gz") as bundle:
         if path.is_absolute() or ".." in path.parts:
             raise SystemExit(f"Unsafe archive path: {member.name}")
 
-        allowed_directory = name in {"web", "web/templates", "web/static"}
+        allowed_directory = name in {
+            "web",
+            "web/templates",
+            "web/static",
+            "web/static/css",
+            "web/static/js",
+            "web/static/img",
+        }
         allowed_file = (
             name == "vfswiss"
             or name.startswith("web/templates/")
-            or name.startswith("web/static/")
+            or name.startswith("web/static/css/")
+            or name.startswith("web/static/js/")
+            or name.startswith("web/static/img/")
         )
         if not (allowed_directory or allowed_file):
             raise SystemExit(f"Unexpected archive path: {member.name}")
@@ -76,14 +85,19 @@ with tarfile.open(archive_path, "r:gz") as bundle:
             member.mode = 0o755
         names.add(name)
 
-    required = {"vfswiss", "web/templates/layout.html"}
+    required = {
+        "vfswiss",
+        "web/templates/layout.html",
+        "web/static/css/style.css",
+        "web/static/js/form.js",
+    }
     if not required.issubset(names) or total_size > 500 * 1024 * 1024:
         raise SystemExit("Deployment archive is incomplete or exceeds the extracted-size limit")
 
     bundle.extractall(destination, members=members, filter="data")
 PY
 
-for path in "$app_root/vfswiss" "$app_root/web/templates" "$app_root/web/static"; do
+for path in "$app_root/vfswiss" "$app_root/web/templates" "$app_root/web/static/css" "$app_root/web/static/js" "$app_root/web/static/img"; do
 	if [[ ! -e "$path" ]]; then
 		printf 'Required application path is missing: %s\n' "$path" >&2
 		exit 1
@@ -99,12 +113,19 @@ restore_previous_release() {
 	fi
 	rm -f -- "$app_root/.vfswiss-new" || return 1
 
-	for path in templates static; do
-		if [[ -e "$backup/$path" ]]; then
-			if [[ -e "$app_root/web/$path" ]]; then
-				mv "$app_root/web/$path" "$stage/web/$path.failed" || return 1
+	if [[ -e "$backup/templates" ]]; then
+		if [[ -e "$app_root/web/templates" ]]; then
+			mv "$app_root/web/templates" "$stage/web/templates.failed" || return 1
+		fi
+		mv "$backup/templates" "$app_root/web/templates" || return 1
+	fi
+
+	for path in css js img; do
+		if [[ -e "$backup/static-$path" ]]; then
+			if [[ -e "$app_root/web/static/$path" ]]; then
+				mv "$app_root/web/static/$path" "$stage/web/static/$path.failed" || return 1
 			fi
-			mv "$backup/$path" "$app_root/web/$path" || return 1
+			mv "$backup/static-$path" "$app_root/web/static/$path" || return 1
 		fi
 	done
 
@@ -116,15 +137,15 @@ restore_previous_release() {
 apply_release() {
 	mv "$app_root/vfswiss" "$backup/vfswiss" || return 1
 	mv "$app_root/web/templates" "$backup/templates" || return 1
-	if [[ -d "$stage/web/static" ]]; then
-		mv "$app_root/web/static" "$backup/static" || return 1
-	fi
 	install -o vfswiss -g vfswiss -m 0755 "$stage/vfswiss" "$app_root/.vfswiss-new" || return 1
 	mv "$app_root/.vfswiss-new" "$app_root/vfswiss" || return 1
 	mv "$stage/web/templates" "$app_root/web/templates" || return 1
-	if [[ -d "$stage/web/static" ]]; then
-		mv "$stage/web/static" "$app_root/web/static" || return 1
-	fi
+	for path in css js img; do
+		if [[ -d "$stage/web/static/$path" ]]; then
+			mv "$app_root/web/static/$path" "$backup/static-$path" || return 1
+			mv "$stage/web/static/$path" "$app_root/web/static/$path" || return 1
+		fi
+	done
 	chown -R vfswiss:vfswiss "$app_root/web/templates" "$app_root/web/static" || return 1
 }
 

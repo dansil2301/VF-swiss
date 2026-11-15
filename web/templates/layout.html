@@ -9,17 +9,17 @@
     <meta property="og:description" content="Премиальный сервис ремонта и обслуживания швейцарских часов в Москве.">
     <meta property="og:type" content="website">
     <link rel="icon" href="/static/img/logo.png" type="image/png">
-    <link rel="stylesheet" href="/static/css/style.css?v=4">
+    <link rel="stylesheet" href="/static/css/style.css?v=5">
     <title>{{ .Title }}</title>
 </head>
 <body>
     {{ block "content" . }}{{ end }}
     <script src="/static/js/main.js?v=4" defer></script>
-    <script src="/static/js/form.js?v=4" defer></script>
+    <script src="/static/js/form.js?v=5" defer></script>
     <script src="/static/js/modal.js?v=4" defer></script>
     <script src="/static/js/carousel.js?v=4" defer></script>
     {{ if .TurnstileSiteKey }}
-    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" defer></script>
     {{ end }}
 </body>
 </html>

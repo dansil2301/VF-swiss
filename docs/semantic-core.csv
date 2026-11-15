@@ -1,0 +1,63 @@
+campaign,ad_group,intent,keyword,match_type,landing_page,notes
+Search | Moscow,Swiss watch repair,commercial,ремонт швейцарских часов Москва,phrase,https://vf-swiss.ru/#contact,Core service
+Search | Moscow,Swiss watch repair,commercial,ремонт швейцарских часов в Москве,phrase,https://vf-swiss.ru/#contact,Core service
+Search | Moscow,Swiss watch repair,commercial,сервис швейцарских часов Москва,phrase,https://vf-swiss.ru/#contact,Core service
+Search | Moscow,Swiss watch repair,commercial,мастерская по ремонту швейцарских часов Москва,phrase,https://vf-swiss.ru/#contact,Core service
+Search | Moscow,Swiss watch repair,commercial,ремонт дорогих часов Москва,phrase,https://vf-swiss.ru/#contact,Check query quality
+Search | Moscow,Swiss watch repair,commercial,ремонт премиальных часов Москва,phrase,https://vf-swiss.ru/#contact,Check query quality
+Search | Moscow,Swiss watch repair,commercial,ремонт элитных часов Москва,phrase,https://vf-swiss.ru/#contact,Check query quality
+Search | Moscow,Swiss watch repair,commercial,ремонт механических часов Москва,phrase,https://vf-swiss.ru/#contact,Confirm service scope
+Search | Moscow,Diagnostics,commercial,диагностика швейцарских часов Москва,phrase,https://vf-swiss.ru/#contact,Advertised as free on site
+Search | Moscow,Diagnostics,commercial,диагностика механизма часов Москва,phrase,https://vf-swiss.ru/#contact,Advertised as free on site
+Search | Moscow,Diagnostics,commercial,проверка механизма часов Москва,phrase,https://vf-swiss.ru/#contact,Advertised as free on site
+Search | Moscow,Diagnostics,commercial,сделать диагностику часов Москва,phrase,https://vf-swiss.ru/#contact,Advertised as free on site
+Search | Moscow,Diagnostics,commercial,бесплатная диагностика часов Москва,phrase,https://vf-swiss.ru/#contact,Match the free-diagnostics offer
+Search | Moscow,Movement service,commercial,обслуживание швейцарских часов Москва,phrase,https://vf-swiss.ru/#contact,Core service
+Search | Moscow,Movement service,commercial,обслуживание механических часов Москва,phrase,https://vf-swiss.ru/#contact,Core service
+Search | Moscow,Movement service,commercial,профилактика механизма часов Москва,phrase,https://vf-swiss.ru/#contact,Core service
+Search | Moscow,Movement service,commercial,полная разборка механизма часов Москва,phrase,https://vf-swiss.ru/#contact,Confirm exact scope before advertising
+Search | Moscow,Movement service,commercial,настройка механизма часов Москва,phrase,https://vf-swiss.ru/#contact,Core service
+Search | Moscow,Movement service,commercial,ремонт механизма часов Москва,phrase,https://vf-swiss.ru/#contact,Core service
+Search | Moscow,Polishing,commercial,полировка часов Москва,phrase,https://vf-swiss.ru/#contact,Advertised service
+Search | Moscow,Polishing,commercial,полировка корпуса часов Москва,phrase,https://vf-swiss.ru/#contact,Confirm materials and scope
+Search | Moscow,Polishing,commercial,восстановить корпус часов Москва,phrase,https://vf-swiss.ru/#contact,Check query quality
+Search | Moscow,Glass replacement,commercial,замена стекла часов Москва,phrase,https://vf-swiss.ru/#contact,Advertised service
+Search | Moscow,Glass replacement,commercial,замена сапфирового стекла часов Москва,phrase,https://vf-swiss.ru/#contact,Advertised service
+Search | Moscow,Glass replacement,commercial,ремонт стекла швейцарских часов Москва,phrase,https://vf-swiss.ru/#contact,Advertised service
+Search | Moscow,Battery replacement,commercial,замена батарейки в часах Москва,phrase,https://vf-swiss.ru/#contact,Advertised service
+Search | Moscow,Battery replacement,commercial,замена элемента питания часов Москва,phrase,https://vf-swiss.ru/#contact,Advertised service
+Search | Moscow,Battery replacement,commercial,замена батарейки в швейцарских часах Москва,phrase,https://vf-swiss.ru/#contact,Advertised service
+Search | Moscow,Straps,commercial,замена ремешка часов Москва,phrase,https://vf-swiss.ru/#contact,Confirm exact scope before advertising
+Search | Moscow,Straps,commercial,изготовление ремешка для часов Москва,phrase,https://vf-swiss.ru/#contact,Advertised service
+Search | Moscow,Straps,commercial,ремешок для часов на заказ Москва,phrase,https://vf-swiss.ru/#contact,Advertised service
+Search | Moscow,Rolex,brand + service,ремонт часов Rolex Москва,phrase,https://vf-swiss.ru/#contact,Check platform trademark policy
+Search | Moscow,Rolex,brand + service,обслуживание Rolex Москва,phrase,https://vf-swiss.ru/#contact,Check platform trademark policy
+Search | Moscow,Rolex,brand + service,сервис Rolex Москва,phrase,https://vf-swiss.ru/#contact,Do not imply authorized status
+Search | Moscow,Patek Philippe,brand + service,ремонт часов Patek Philippe Москва,phrase,https://vf-swiss.ru/#contact,Check platform trademark policy
+Search | Moscow,Patek Philippe,brand + service,обслуживание Patek Philippe Москва,phrase,https://vf-swiss.ru/#contact,Check platform trademark policy
+Search | Moscow,Patek Philippe,brand + service,сервис Patek Philippe Москва,phrase,https://vf-swiss.ru/#contact,Do not imply authorized status
+Search | Moscow,Audemars Piguet,brand + service,ремонт часов Audemars Piguet Москва,phrase,https://vf-swiss.ru/#contact,Check platform trademark policy
+Search | Moscow,Audemars Piguet,brand + service,обслуживание Audemars Piguet Москва,phrase,https://vf-swiss.ru/#contact,Check platform trademark policy
+Search | Moscow,Audemars Piguet,brand + service,сервис Audemars Piguet Москва,phrase,https://vf-swiss.ru/#contact,Do not imply authorized status
+Search | Moscow,Vacheron Constantin,brand + service,ремонт часов Vacheron Constantin Москва,phrase,https://vf-swiss.ru/#contact,Check platform trademark policy
+Search | Moscow,Vacheron Constantin,brand + service,обслуживание Vacheron Constantin Москва,phrase,https://vf-swiss.ru/#contact,Check platform trademark policy
+Search | Moscow,Vacheron Constantin,brand + service,сервис Vacheron Constantin Москва,phrase,https://vf-swiss.ru/#contact,Do not imply authorized status
+Search | Moscow,Breguet,brand + service,ремонт часов Breguet Москва,phrase,https://vf-swiss.ru/#contact,Check platform trademark policy
+Search | Moscow,Breguet,brand + service,обслуживание Breguet Москва,phrase,https://vf-swiss.ru/#contact,Check platform trademark policy
+Search | Moscow,Breguet,brand + service,сервис Breguet Москва,phrase,https://vf-swiss.ru/#contact,Do not imply authorized status
+Search | Moscow,Cartier,brand + service,ремонт часов Cartier Москва,phrase,https://vf-swiss.ru/#contact,Check platform trademark policy
+Search | Moscow,Cartier,brand + service,обслуживание Cartier Москва,phrase,https://vf-swiss.ru/#contact,Check platform trademark policy
+Search | Moscow,Cartier,brand + service,сервис Cartier Москва,phrase,https://vf-swiss.ru/#contact,Do not imply authorized status
+Search | Moscow,Breitling,brand + service,ремонт часов Breitling Москва,phrase,https://vf-swiss.ru/#contact,Check platform trademark policy
+Search | Moscow,Breitling,brand + service,обслуживание Breitling Москва,phrase,https://vf-swiss.ru/#contact,Check platform trademark policy
+Search | Moscow,Breitling,brand + service,сервис Breitling Москва,phrase,https://vf-swiss.ru/#contact,Do not imply authorized status
+Search | Moscow,Franck Muller,brand + service,ремонт часов Franck Muller Москва,phrase,https://vf-swiss.ru/#contact,Check platform trademark policy
+Search | Moscow,Franck Muller,brand + service,обслуживание Franck Muller Москва,phrase,https://vf-swiss.ru/#contact,Check platform trademark policy
+Search | Moscow,Franck Muller,brand + service,сервис Franck Muller Москва,phrase,https://vf-swiss.ru/#contact,Do not imply authorized status
+Search | Moscow,Blancpain,brand + service,ремонт часов Blancpain Москва,phrase,https://vf-swiss.ru/#contact,Check platform trademark policy
+Search | Moscow,Blancpain,brand + service,обслуживание Blancpain Москва,phrase,https://vf-swiss.ru/#contact,Check platform trademark policy
+Search | Moscow,Blancpain,brand + service,сервис Blancpain Москва,phrase,https://vf-swiss.ru/#contact,Do not imply authorized status
+Search | Moscow,Local intent,commercial,ремонт часов центр Москвы,phrase,https://vf-swiss.ru/#contact,Check location targeting
+Search | Moscow,Local intent,commercial,часовая мастерская Петровка Москва,phrase,https://vf-swiss.ru/#contact,Verify address and service area
+Search | Moscow,Local intent,commercial,ремонт часов рядом Петровка,phrase,https://vf-swiss.ru/#contact,Check location targeting
+Search | Moscow,Local intent,commercial,сервис часов в центре Москвы,phrase,https://vf-swiss.ru/#contact,Check location targeting

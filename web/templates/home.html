@@ -189,7 +189,16 @@
 
             {{ if .TurnstileSiteKey }}
             <div class="turnstile-wrap">
-                <div class="cf-turnstile" data-sitekey="{{ .TurnstileSiteKey }}" data-theme="dark" data-language="ru"></div>
+                <div class="cf-turnstile"
+                     data-sitekey="{{ .TurnstileSiteKey }}"
+                     data-theme="dark"
+                     data-language="ru"
+                     data-callback="vfTurnstileSuccess"
+                     data-error-callback="vfTurnstileError"
+                     data-expired-callback="vfTurnstileExpired"
+                     data-timeout-callback="vfTurnstileTimeout"></div>
+                <p id="turnstile-status" class="hint" role="status" aria-live="polite">Пройдите проверку Cloudflare, чтобы отправить заявку.</p>
+                <button id="turnstile-retry" class="inline-link" type="button" hidden>Обновить страницу и повторить проверку</button>
             </div>
             {{ end }}
 

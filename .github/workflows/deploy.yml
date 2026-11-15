@@ -56,7 +56,7 @@ jobs:
           go-version-file: go.mod
           cache: true
 
-      - name: Detect static asset changes
+      - name: Detect static media changes
         id: assets
         env:
           EVENT_NAME: ${{ github.event_name }}
@@ -67,7 +67,7 @@ jobs:
           if [[ "$EVENT_NAME" == "workflow_dispatch" ]]; then
             include_static="$INCLUDE_STATIC_INPUT"
           elif [[ ! "$BEFORE_SHA" =~ ^0+$ ]] && git cat-file -e "$BEFORE_SHA^{commit}" 2>/dev/null; then
-            if git diff --quiet "$BEFORE_SHA" "$GITHUB_SHA" -- web/static; then
+            if git diff --quiet "$BEFORE_SHA" "$GITHUB_SHA" -- web/static/img; then
               include_static=false
             else
               include_static=true
@@ -84,16 +84,17 @@ jobs:
           GOOS: linux
           INCLUDE_STATIC: ${{ steps.assets.outputs.include_static }}
         run: |
-          mkdir -p dist/package/web
+          mkdir -p dist/package/web/static
           go build -trimpath -ldflags="-s -w" -o dist/package/vfswiss ./cmd/server
           cp -R web/templates dist/package/web/
+          cp -R web/static/css web/static/js dist/package/web/static/
           if [[ "$INCLUDE_STATIC" == "true" ]]; then
-            cp -R web/static dist/package/web/
-            tar -czf dist/release.tar.gz -C dist/package vfswiss web/templates web/static
-            echo "Static assets included in release."
+            cp -R web/static/img dist/package/web/static/
+            tar -czf dist/release.tar.gz -C dist/package vfswiss web/templates web/static/css web/static/js web/static/img
+            echo "Static media included in release."
           else
-            tar -czf dist/release.tar.gz -C dist/package vfswiss web/templates
-            echo "Static assets unchanged; skipping images and videos."
+            tar -czf dist/release.tar.gz -C dist/package vfswiss web/templates web/static/css web/static/js
+            echo "Images and videos unchanged; skipping static media."
           fi
           ls -lh dist/release.tar.gz
 

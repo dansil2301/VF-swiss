@@ -10,7 +10,61 @@ document.addEventListener('DOMContentLoaded', () => {
   const descriptionInput = document.getElementById('description');
   const photosInput = document.getElementById('photos');
   const photoSummary = document.getElementById('photo-summary');
+  const turnstileWidget = document.querySelector('.cf-turnstile');
+  const turnstileStatus = document.getElementById('turnstile-status');
+  const turnstileRetry = document.getElementById('turnstile-retry');
+  const turnstileEnabled = !!turnstileWidget;
+  let turnstilePassed = false;
+  let turnstileFailed = false;
   let selectedFiles = [];
+
+  function setTurnstileState(passed, failed, message) {
+    turnstilePassed = passed;
+    turnstileFailed = failed;
+    if (turnstileStatus) turnstileStatus.textContent = message;
+    if (turnstileRetry) turnstileRetry.hidden = !failed;
+    validateRequiredFields();
+  }
+
+  if (turnstileEnabled) {
+    window.vfTurnstileSuccess = (token) => {
+      if (token) {
+        setTurnstileState(true, false, 'Проверка пройдена.');
+      } else {
+        setTurnstileState(false, true, 'Не удалось подтвердить проверку Cloudflare. Обновите страницу и попробуйте снова.');
+      }
+    };
+    window.vfTurnstileError = () => {
+      setTurnstileState(false, true, 'Проверка Cloudflare недоступна. Проверьте подключение и обновите страницу.');
+    };
+    window.vfTurnstileExpired = () => {
+      setTurnstileState(false, false, 'Проверка истекла. Пройдите её ещё раз.');
+    };
+    window.vfTurnstileTimeout = () => {
+      setTurnstileState(false, false, 'Проверка заняла слишком много времени. Пройдите её ещё раз.');
+    };
+
+    window.addEventListener('error', (event) => {
+      if (event.target instanceof HTMLScriptElement &&
+          event.target.src.startsWith('https://challenges.cloudflare.com/turnstile/')) {
+        setTurnstileState(false, true, 'Не удалось загрузить проверку Cloudflare. Проверьте подключение и обновите страницу.');
+      }
+    }, true);
+
+    if (!window.turnstile) {
+      setTurnstileState(false, true, 'Не удалось загрузить проверку Cloudflare. Проверьте подключение и обновите страницу.');
+    }
+
+    window.setTimeout(() => {
+      if (!turnstilePassed && !turnstileFailed) {
+        setTurnstileState(false, true, 'Проверка Cloudflare не завершилась. Проверьте подключение и обновите страницу.');
+      }
+    }, 60000);
+
+    if (turnstileRetry) {
+      turnstileRetry.addEventListener('click', () => window.location.reload());
+    }
+  }
 
   function applyFiles(files) {
     if (!photosInput) {
@@ -100,7 +154,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (phoneInput) phoneInput.classList.toggle('invalid', !phoneFilled);
     if (brandSelect) brandSelect.classList.toggle('invalid', !brandFilled);
 
-    submitButton.disabled = !(nameFilled && phoneFilled && brandFilled);
+    submitButton.disabled = !(nameFilled && phoneFilled && brandFilled && (!turnstileEnabled || turnstilePassed));
   }
 
   function renderFileSummary() {
@@ -211,8 +265,15 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   if (form) {
-    form.addEventListener('submit', () => {
+    form.addEventListener('submit', (event) => {
       syncBrandField();
+      if (turnstileEnabled && !turnstilePassed) {
+        event.preventDefault();
+        if (!turnstileFailed && turnstileStatus) {
+          turnstileStatus.textContent = 'Пройдите проверку Cloudflare, чтобы отправить заявку.';
+        }
+        return;
+      }
       if (submitButton) {
         submitButton.disabled = true;
         submitButton.textContent = 'Отправляем...';

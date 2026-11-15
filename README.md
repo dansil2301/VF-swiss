@@ -71,7 +71,7 @@ useradd --create-home --home-dir /var/lib/vfswiss-deploy --shell /bin/bash vfswi
 install -d -o vfswiss-deploy -g vfswiss-deploy -m 0700 /var/lib/vfswiss-deploy/incoming
 install -d -o vfswiss-deploy -g vfswiss-deploy -m 0700 /var/lib/vfswiss-deploy/.ssh
 install -o root -g root -m 0750 /tmp/vfswiss-deploy.sh /usr/local/sbin/vfswiss-deploy
-printf '%s\n' 'vfswiss-deploy ALL=(root) NOPASSWD: /usr/local/sbin/vfswiss-deploy' > /etc/sudoers.d/vfswiss-deploy
+printf '%s\n' 'vfswiss-deploy ALL=(root) NOPASSWD: /usr/local/sbin/vfswiss-deploy ""' > /etc/sudoers.d/vfswiss-deploy
 chmod 0440 /etc/sudoers.d/vfswiss-deploy
 visudo -cf /etc/sudoers.d/vfswiss-deploy
 ```
@@ -89,7 +89,7 @@ chown vfswiss-deploy:vfswiss-deploy /var/lib/vfswiss-deploy/.ssh/authorized_keys
 chmod 0600 /var/lib/vfswiss-deploy/.ssh/authorized_keys
 ```
 
-У deploy-пользователя нет root-доступа по SSH; `sudo` разрешает ему только root-owned helper без аргументов. Опция `restrict` запрещает SSH port/agent/X11 forwarding и PTY для этого ключа. Проверьте sudoers командой `visudo -cf` до включения pipeline.
+У deploy-пользователя нет root-доступа по SSH; `sudo` разрешает ему только root-owned helper без аргументов (`""` в sudoers означает «без аргументов»). Опция `restrict` запрещает SSH port/agent/X11 forwarding и PTY для этого ключа, но сама по себе не запрещает shell. У deploy-пользователя нет прав чтения production `.env` или записи в файлы приложения, кроме входящего каталога. Проверьте sudoers командой `visudo -cf` до включения pipeline.
 
 При проверке сервера обнаружено, что SQLite-файл имеет права `0644`; ограничьте чтение файла пользователем приложения:
 

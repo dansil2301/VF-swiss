@@ -1,0 +1,82 @@
+{{ define "examples" }}
+    {{ template "layout" . }}
+{{ end }}
+
+{{ define "content" }}
+<header class="site-header">
+    <div class="brand" aria-label="VF swiss">
+        <img src="/static/img/logo.png" alt="Swiss flag" class="brand-mark">
+        <div class="brand-text"><span>VF</span> swiss</div>
+    </div>
+    <nav class="header-actions" aria-label="Навигация по странице примеров">
+        <a href="/" class="nav-link">На главную</a>
+        <a href="tel:+79651716996" class="phone-link">8 (965) 171-69-96</a>
+        <a href="tel:+79162459223" class="phone-link">8 (916) 245-92-23</a>
+    </nav>
+</header>
+
+<main class="page-main">
+    <section class="examples-page section-shell" aria-labelledby="examples-title">
+        <div class="section-heading">
+            <p class="eyebrow eyebrow-centered">Галерея</p>
+            <h2 id="examples-title">Примеры работ</h2>
+        </div>
+
+        <div class="examples-back">
+            <a href="/" class="btn btn-secondary">← Вернуться на главную</a>
+        </div>
+
+        <div class="examples-grid">
+            {{ range .Examples }}
+                <article class="example-card">
+                    {{ if .IsVideo }}
+                        <video controls playsinline webkit-playsinline preload="metadata" muted{{ if .Poster }} poster="{{ .Poster }}"{{ end }}>
+                            <source src="/static/img/exmaples/{{ .Name }}" type="video/mp4">
+                        </video>
+                    {{ else }}
+                        <img src="/static/img/exmaples/{{ .Name }}" alt="Пример работы VF Swiss" loading="lazy">
+                    {{ end }}
+                </article>
+            {{ end }}
+        </div>
+    </section>
+</main>
+
+<footer class="site-footer">
+    <div class="footer-brand-wrap">
+        <div class="footer-brand" aria-label="VF swiss">VF swiss</div>
+        <p>Ремонт, диагностика и обслуживание часов.</p>
+    </div>
+    <div class="footer-links">
+        <a href="https://t.me/VFswissboutique" class="btn btn-secondary footer-btn" target="_blank" rel="noopener noreferrer">Telegram</a>
+    </div>
+    <div class="footer-meta">
+        <p>Петровка, 23/10 стр. 5</p>
+        <p>Москва</p>
+        <button type="button" class="inline-link inline-link-button" data-modal-open="privacy-modal">Политика конфиденциальности</button>
+    </div>
+</footer>
+
+<div class="modal" id="privacy-modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="privacy-title">
+    <div class="modal-backdrop" data-close-modal></div>
+    <div class="modal-dialog privacy-dialog" tabindex="-1">
+        <button type="button" class="modal-close" data-close-modal aria-label="Закрыть политику конфиденциальности">×</button>
+        <div class="modal-header">
+            <p class="eyebrow eyebrow-centered">Документ</p>
+            <h3 id="privacy-title">Политика конфиденциальности</h3>
+        </div>
+        <div class="privacy-content">
+            <p><strong>Дата публикации:</strong> 25 августа 2026 года</p>
+            <p>Настоящая Политика конфиденциальности определяет порядок обработки и защиты персональных данных пользователей сайта VF swiss, оказывающего услуги по ремонту, техническому обслуживанию, диагностике и иным видам обслуживания часов.</p>
+            <p>Мы собираем и обрабатываем персональные данные только в объеме, необходимом для оказания услуг, связи с клиентом, оформления заказа, а также для обеспечения безопасности и соблюдения требований законодательства.</p>
+            <p>К персональным данным относятся: имя, контактный номер телефона, адрес электронной почты, данные, указанные в форме заявки, а также иные сведения, которые пользователь добровольно предоставляет при обращении к нам.</p>
+            <p>Обработка данных осуществляется на законных основаниях, в том числе на основании согласия пользователя, заключенного договора, а также для исполнения наших обязательств перед клиентом.</p>
+            <p>Мы не передаем персональные данные третьим лицам, за исключением случаев, когда это необходимо для оказания услуг, соблюдения требований законодательства, а также при наличии согласия пользователя.</p>
+            <p>В целях защиты данных мы применяем организационные и технические меры, направленные на предотвращение утечки, потери, несанкционированного доступа и иного неправомерного использования информации.</p>
+            <p>Пользователь вправе в любой момент запросить информацию о своих персональных данных, их обновлении, исправлении, ограничении обработки или удалении, направив соответствующее обращение через форму связи или по контактным данным, указанным на сайте.</p>
+            <p>Мы храним персональные данные не дольше, чем это необходимо для целей, для которых они были собраны, либо в течение срока, установленного действующим законодательством.</p>
+            <p>Использование сайта означает согласие пользователя с настоящей Политикой конфиденциальности. При наличии вопросов по обработке персональных данных вы можете обратиться к нам любым удобным способом через сайт или контактную информацию.</p>
+        </div>
+    </div>
+</div>
+{{ end }}

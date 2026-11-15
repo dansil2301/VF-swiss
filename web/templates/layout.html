@@ -1,0 +1,27 @@
+{{ define "layout" }}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="{{ .Description }}">
+    <meta property="og:title" content="VF swiss — ремонт и обслуживание швейцарских часов">
+    <meta property="og:description" content="Премиальный сервис ремонта и обслуживания швейцарских часов в Москве.">
+    <meta property="og:type" content="website">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/static/img/logo.png" type="image/png">
+    <link rel="stylesheet" href="/static/css/style.css?v=4">
+    <title>{{ .Title }}</title>
+</head>
+<body>
+    {{ block "content" . }}{{ end }}
+    <script src="/static/js/main.js?v=4" defer></script>
+    <script src="/static/js/form.js?v=4" defer></script>
+    <script src="/static/js/modal.js?v=4" defer></script>
+    <script src="/static/js/carousel.js?v=4" defer></script>
+    {{ if .TurnstileSiteKey }}
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+    {{ end }}
+</body>
+</html>
+{{ end }}

@@ -1,0 +1,23 @@
+{{ define "error" }}
+    {{ template "layout" . }}
+{{ end }}
+
+{{ define "content" }}
+<header class="site-header">
+    <div class="logo">VF SWISS</div>
+    <a class="phone-link" href="tel:+79991234567">+7 (999) 123-45-67</a>
+</header>
+<main class="error-page">
+    <section class="error-card">
+        <h1>{{ .Title }}</h1>
+        <p>{{ .Message }}</p>
+        <a class="btn btn-primary" href="/">Вернуться на сайт</a>
+    </section>
+</main>
+<footer class="site-footer">
+    <div class="footer-brand">VF SWISS</div>
+    <p>Москва</p>
+    <p>Телефон: <a href="tel:+79991234567">+7 (999) 123-45-67</a></p>
+    <p>Ежедневно 10:00–20:00</p>
+</footer>
+{{ end }}

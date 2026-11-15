@@ -135,5 +135,13 @@ if ! systemctl restart vfswiss || ! systemctl is-active --quiet vfswiss; then
 	exit 1
 fi
 
+if ! curl --fail --silent --show-error --max-time 10 http://127.0.0.1:8080/health >/dev/null; then
+	printf 'Local health check failed; restoring previous release\n' >&2
+	if ! restore_previous_release; then
+		printf 'Rollback failed; inspect vfswiss.service and restore the previous files manually\n' >&2
+	fi
+	exit 1
+fi
+
 rm -f -- "$archive"
 printf 'VF Swiss deployment completed successfully\n'

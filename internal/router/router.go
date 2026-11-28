@@ -11,7 +11,7 @@ import (
 	"github.com/vfswiss/vfswiss/internal/middleware"
 )
 
-//go:embed yandex_e27940cec41102c4.html
+//go:embed yandex_*.html
 var yandexVerificationFile embed.FS
 
 func New(cfg *config.Config, h *handlers.Handlers, logger *slog.Logger) http.Handler {
@@ -20,6 +20,7 @@ func New(cfg *config.Config, h *handlers.Handlers, logger *slog.Logger) http.Han
 	mux := http.NewServeMux()
 	mux.Handle("/static/", http.StripPrefix("/static/", fileServer))
 	mux.Handle("/yandex_e27940cec41102c4.html", http.StripPrefix("/", verificationFileServer))
+	mux.Handle("/yandex_50d24b5586b736f1.html", http.StripPrefix("/", verificationFileServer))
 	mux.HandleFunc("/robots.txt", h.Robots)
 	mux.HandleFunc("/sitemap.xml", h.Sitemap)
 	mux.HandleFunc("/health", h.Health)

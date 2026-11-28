@@ -14,6 +14,7 @@ func New(cfg *config.Config, h *handlers.Handlers, logger *slog.Logger) http.Han
 	fileServer := http.FileServer(noDirFS{fs: http.Dir(cfg.StaticDir)})
 	mux := http.NewServeMux()
 	mux.Handle("/static/", http.StripPrefix("/static/", fileServer))
+	mux.Handle("/yandex_e27940cec41102c4.html", http.StripPrefix("/", fileServer))
 	mux.HandleFunc("/robots.txt", h.Robots)
 	mux.HandleFunc("/sitemap.xml", h.Sitemap)
 	mux.HandleFunc("/health", h.Health)

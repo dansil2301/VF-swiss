@@ -70,7 +70,6 @@ with tarfile.open(archive_path, "r:gz") as bundle:
         allowed_file = (
             name == "vfswiss"
             or name.startswith("web/templates/")
-            or name == "web/static/yandex_e27940cec41102c4.html"
             or name.startswith("web/static/css/")
             or name.startswith("web/static/js/")
             or name.startswith("web/static/img/")
@@ -91,7 +90,6 @@ with tarfile.open(archive_path, "r:gz") as bundle:
         "web/templates/layout.html",
         "web/static/css/style.css",
         "web/static/js/form.js",
-        "web/static/yandex_e27940cec41102c4.html",
     }
     if not required.issubset(names) or total_size > 500 * 1024 * 1024:
         raise SystemExit("Deployment archive is incomplete or exceeds the extracted-size limit")
@@ -130,13 +128,6 @@ restore_previous_release() {
 			mv "$backup/static-$path" "$app_root/web/static/$path" || return 1
 		fi
 	done
-	if [[ -e "$backup/static-yandex_e27940cec41102c4.html" || ! -e "$stage/web/static/yandex_e27940cec41102c4.html" ]]; then
-		rm -f -- "$app_root/web/static/yandex_e27940cec41102c4.html" || return 1
-		if [[ -e "$backup/static-yandex_e27940cec41102c4.html" ]]; then
-			mv "$backup/static-yandex_e27940cec41102c4.html" "$app_root/web/static/yandex_e27940cec41102c4.html" || return 1
-		fi
-	fi
-
 	chown -R vfswiss:vfswiss "$app_root/web/templates" "$app_root/web/static" || return 1
 	systemctl restart vfswiss || return 1
 	systemctl is-active --quiet vfswiss || return 1
@@ -154,10 +145,6 @@ apply_release() {
 			mv "$stage/web/static/$path" "$app_root/web/static/$path" || return 1
 		fi
 	done
-	if [[ -f "$app_root/web/static/yandex_e27940cec41102c4.html" ]]; then
-		mv "$app_root/web/static/yandex_e27940cec41102c4.html" "$backup/static-yandex_e27940cec41102c4.html" || return 1
-	fi
-	mv "$stage/web/static/yandex_e27940cec41102c4.html" "$app_root/web/static/yandex_e27940cec41102c4.html" || return 1
 	chown -R vfswiss:vfswiss "$app_root/web/templates" "$app_root/web/static" || return 1
 }
 

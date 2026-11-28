@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
-	"path/filepath"
 	"testing"
 
 	"github.com/vfswiss/vfswiss/internal/config"
@@ -14,10 +13,6 @@ import (
 
 func TestYandexVerificationFileServedAtSiteRoot(t *testing.T) {
 	staticDir := t.TempDir()
-	content := []byte("Verification: e27940cec41102c4")
-	if err := os.WriteFile(filepath.Join(staticDir, "yandex_e27940cec41102c4.html"), content, 0600); err != nil {
-		t.Fatal(err)
-	}
 
 	handler := New(
 		&config.Config{StaticDir: staticDir},
@@ -31,6 +26,10 @@ func TestYandexVerificationFileServedAtSiteRoot(t *testing.T) {
 
 	if response.Code != http.StatusOK {
 		t.Fatalf("status = %d, want %d", response.Code, http.StatusOK)
+	}
+	content, err := os.ReadFile("yandex_e27940cec41102c4.html")
+	if err != nil {
+		t.Fatal(err)
 	}
 	if response.Body.String() != string(content) {
 		t.Fatalf("body = %q, want %q", response.Body.String(), content)

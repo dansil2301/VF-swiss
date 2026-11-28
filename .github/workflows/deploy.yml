@@ -88,13 +88,12 @@ jobs:
           go build -trimpath -ldflags="-s -w" -o dist/package/vfswiss ./cmd/server
           cp -R web/templates dist/package/web/
           cp -R web/static/css web/static/js dist/package/web/static/
-          cp web/static/yandex_e27940cec41102c4.html dist/package/web/static/
           if [[ "$INCLUDE_STATIC" == "true" ]]; then
             cp -R web/static/img dist/package/web/static/
-            tar -czf dist/release.tar.gz -C dist/package vfswiss web/templates web/static/css web/static/js web/static/img web/static/yandex_e27940cec41102c4.html
+            tar -czf dist/release.tar.gz -C dist/package vfswiss web/templates web/static/css web/static/js web/static/img
             echo "Static media included in release."
           else
-            tar -czf dist/release.tar.gz -C dist/package vfswiss web/templates web/static/css web/static/js web/static/yandex_e27940cec41102c4.html
+            tar -czf dist/release.tar.gz -C dist/package vfswiss web/templates web/static/css web/static/js
             echo "Images and videos unchanged; skipping static media."
           fi
           ls -lh dist/release.tar.gz

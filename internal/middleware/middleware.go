@@ -69,8 +69,8 @@ func SecurityHeaders(next http.Handler) http.Handler {
 			"default-src 'self'; "+
 				"img-src 'self' data: https://yandex.ru https://*.yandex.ru; "+
 				"style-src 'self' 'unsafe-inline' https://yandex.ru https://*.yandex.ru; "+
-				"script-src 'self' https://yandex.ru https://*.yandex.ru https://challenges.cloudflare.com; "+
-				"connect-src 'self' https://challenges.cloudflare.com; "+
+				"script-src 'self' https://yandex.ru https://*.yandex.ru https://challenges.cloudflare.com 'sha256-zR6Znb6tNEhShQf3ssHJ0q3KuXLKLDPvvom9H/A1u9c='; "+
+				"connect-src 'self' https://challenges.cloudflare.com https://mc.yandex.ru; "+
 				"frame-src 'self' https://yandex.ru https://*.yandex.ru https://challenges.cloudflare.com;",
 		)
 
